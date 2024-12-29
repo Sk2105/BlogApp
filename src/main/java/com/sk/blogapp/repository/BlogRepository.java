@@ -15,20 +15,17 @@ public interface BlogRepository extends JpaRepository<Blog, String> {
 
     /**
      * Fetches all blogs with author information.
-     * 
+     *
      * @param pageable The pageable parameters.
      * @return A page of objects containing blog information and author information.
      */
     @Query("SELECT b.id, b.title, b.content, " +
-            "(SELECT u.id FROM User u WHERE u.id = b.author.id) " +
-            "AS author_id, " +
-            "(SELECT u.name FROM User u WHERE u.id = b.author.id) " +
-            "AS author_name, " +
-            "(SELECT u.email FROM User u WHERE u.id = b.author.id) " +
-            "AS author_email, " +
-            "(select u.imageUrl from User u where u.id = b.author.id) " +
-            "AS author_imageUrl " +
-            "FROM Blog b")
+            "a.id AS authorId, " +
+            "a.name AS authorName, " +
+            "a.email AS authorEmail, " +
+            "a.imageUrl AS authorImageUrl " +
+            "FROM Blog b " +
+            "JOIN b.author a ")
     Page<Object[]> findAllBlogsWithPage(Pageable pageable);
 
     default List<BlogResponseWithAuthor> findAllBlogs(Pageable pageable) {
@@ -40,15 +37,13 @@ public interface BlogRepository extends JpaRepository<Blog, String> {
     }
 
     @Query("SELECT b.id, b.title, b.content, " +
-            "(SELECT u.id FROM User u WHERE u.id = b.author.id) " +
-            "AS author_id, " +
-            "(SELECT u.name FROM User u WHERE u.id = b.author.id) " +
-            "AS author_name, " +
-            "(SELECT u.email FROM User u WHERE u.id = b.author.id) " +
-            "AS author_email, " +
-            "(select u.imageUrl from User u where u.id = b.author.id) " +
-            "AS author_imageUrl " +
-            "FROM Blog b where b.id = :id")
+            "a.id AS authorId, " +
+            "a.name AS authorName, " +
+            "a.email AS authorEmail, " +
+            "a.imageUrl AS authorImageUrl " +
+            "FROM Blog b " +
+            "JOIN b.author a " +
+            "WHERE b.id = :id")
     List<Object[]> fetchBlogById(String id);
 
     default BlogResponseWithAuthor findBlogById(String id) throws RuntimeException {

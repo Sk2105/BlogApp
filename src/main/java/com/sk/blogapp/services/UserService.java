@@ -1,12 +1,7 @@
 package com.sk.blogapp.services;
 
-import java.io.File;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.UUID;
-
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -17,8 +12,10 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.sk.blogapp.dto.UserDTO;
 import com.sk.blogapp.jwt.JwtUtils;
+import com.sk.blogapp.models.Image;
 import com.sk.blogapp.models.User;
 import com.sk.blogapp.repository.UserRepository;
+import com.sk.blogapp.response.AuthorResponse;
 import com.sk.blogapp.response.UserResponse;
 
 @Service
@@ -32,6 +29,12 @@ public class UserService implements UserDetailsService {
 
     @Autowired
     private JwtUtils jwtUtils;
+
+    @Autowired
+    private ImageService imageService;
+
+    @Value("${app.host}")
+    private String host;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -49,7 +52,13 @@ public class UserService implements UserDetailsService {
     public UserResponse registerUser(UserDTO userDTO) throws RuntimeException {
         try {
             User user = this.toUser(userDTO);
-            return UserResponse.toUserResponse(userRepository.save(user));
+            userRepository.save(user);
+            AuthorResponse author = userRepository.findAuthorById(user.getId());
+            return new UserResponse(
+                    user.getId(),
+                    user.getName(),
+                    user.getEmail(),
+                    author.imageUrl());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -91,7 +100,12 @@ public class UserService implements UserDetailsService {
     public UserResponse getUserResponse(String email) throws RuntimeException {
         try {
             User user = getUser(email);
-            return UserResponse.toUserResponse(user);
+            AuthorResponse author = userRepository.findAuthorById(user.getId());
+            return new UserResponse(
+                    user.getId(),
+                    user.getName(),
+                    user.getEmail(),
+                    author.imageUrl());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -99,8 +113,14 @@ public class UserService implements UserDetailsService {
 
     public UserResponse getMe() throws RuntimeException {
         try {
-            UserDetails user = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-            return UserResponse.toUserResponse(userRepository.findByEmail(user.getUsername()));
+            UserDetails myUser = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            User user = userRepository.findByEmail(myUser.getUsername());
+            AuthorResponse author = userRepository.findAuthorById(user.getId());
+            return new UserResponse(
+                    user.getId(),
+                    user.getName(),
+                    user.getEmail(),
+                    author.imageUrl());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -116,34 +136,21 @@ public class UserService implements UserDetailsService {
      */
     public String uploadImage(MultipartFile file) {
         try {
-            @SuppressWarnings("null")
-            String extension = file.getOriginalFilename().split("\\.")[1];
-            if (!extension.equals("png") && !extension.equals("jpg") && !extension.equals("jpeg")) {
-                throw new RuntimeException("Invalid file type");
-            }
 
-            if (file.isEmpty()) {
-                throw new RuntimeException("File is empty");
-            }
+            Image image = new Image();
+            image.setContentType(file.getContentType());
+            image.setFileName(file.getOriginalFilename());
+            image.setData(file.getBytes());
+            imageService.saveFile(image);
 
-            if (file.getSize() > 1000000) {
-                throw new RuntimeException("File size is too large");
-            }
-
-            String fileName = UUID.randomUUID().toString();
-            File destFile = new File("src/main/resources/static/images/" + fileName + "." + extension);
-
-            Path path = Paths.get(destFile.getAbsolutePath());
-            Files.copy(file.getInputStream(), path);
             User user = userRepository.findByEmail(getMe().email());
-            user.setImageUrl("http://localhost:8080/images/" + fileName);
+            user.setImageUrl(host + "/images/" + image.getId());
             userRepository.save(user);
             return "Image uploaded successfully";
-            
+
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
-
 
 }

@@ -14,6 +14,7 @@ import com.sk.blogapp.models.User;
 import com.sk.blogapp.repository.BlogRepository;
 import com.sk.blogapp.response.AuthorResponse;
 import com.sk.blogapp.response.BlogResponseWithAuthor;
+import com.sk.blogapp.response.UserResponse;
 
 @Service
 public class BlogService {
@@ -23,22 +24,16 @@ public class BlogService {
 
     @Autowired
     private UserService userService;
-    
 
-
-
-
-   public List<BlogResponseWithAuthor> getPaged(int page, int size) {
-       Pageable pageable = Pageable.ofSize(size).withPage(page);
-       return blogRepository.findAllBlogs(pageable);
-   }
+    public List<BlogResponseWithAuthor> getPaged(int page, int size) {
+        Pageable pageable = Pageable.ofSize(size).withPage(page);
+        return blogRepository.findAllBlogs(pageable);
+    }
 
     public BlogResponseWithAuthor getBlog(String id) throws RuntimeException {
         return blogRepository.findBlogById(id);
     }
 
-   
-    
     public BlogResponseWithAuthor createBlog(BlogDTO blogDTO) throws RuntimeException {
         var userdetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
@@ -47,6 +42,7 @@ public class BlogService {
         }
 
         User user = userService.getUser(userdetails.getUsername());
+        UserResponse userResponse = userService.getMe();
 
         Blog blog = new Blog();
         blog.setTitle(blogDTO.title());
@@ -58,7 +54,11 @@ public class BlogService {
 
         BlogResponseWithAuthor blogResponse = new BlogResponseWithAuthor(blog.getId(), blog.getTitle(),
                 blog.getContent(),
-                new AuthorResponse(user.getId(), user.getName(), user.getEmail(), user.getImageUrl()));
+                new AuthorResponse(
+                        userResponse.id(),
+                        userResponse.name(),
+                        userResponse.email(),
+                        userResponse.imageUrl()));
         return blogResponse;
     }
 
@@ -70,6 +70,7 @@ public class BlogService {
         }
 
         User user = userService.getUser(userdetails.getUsername());
+        UserResponse userResponse = userService.getMe();
 
         Blog blog = blogRepository.findById(id).orElseThrow(() -> new RuntimeException("Blog not found"));
 
@@ -84,7 +85,11 @@ public class BlogService {
 
         BlogResponseWithAuthor blogResponse = new BlogResponseWithAuthor(blog.getId(), blog.getTitle(),
                 blog.getContent(),
-                new AuthorResponse(user.getId(), user.getName(), user.getEmail(), user.getImageUrl()));
+                new AuthorResponse(
+                        userResponse.id(),
+                        userResponse.name(),
+                        userResponse.email(),
+                        userResponse.imageUrl()));
         return blogResponse;
     }
 

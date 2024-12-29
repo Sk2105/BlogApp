@@ -31,7 +31,9 @@ public class Blog {
     @Column(nullable = false, unique = true)
     private String title;
 
-    @Column(nullable = false)
+
+
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
 
     @ManyToOne(cascade = CascadeType.PERSIST)

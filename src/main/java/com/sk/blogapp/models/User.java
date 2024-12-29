@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.UuidGenerator;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -41,8 +40,6 @@ public class User implements UserDetails {
     
     private String password;
 
-
-    @ColumnDefault(value = "")
     private String imageUrl;
 
     @OneToMany(mappedBy = "author")

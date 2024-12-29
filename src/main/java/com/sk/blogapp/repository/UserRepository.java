@@ -15,7 +15,7 @@ public interface UserRepository extends JpaRepository<User, String> {
 
         User findByEmail(String email);
 
-        @Query("SELECT u.id, u.name, u.email,u.imageUrl " +
+        @Query("SELECT u.id, u.name, u.email, u.imageUrl as image_url " +
                         "FROM User u")
         Page<Object[]> fetchAllAuthors(Pageable pageable);
 
@@ -25,7 +25,7 @@ public interface UserRepository extends JpaRepository<User, String> {
                                 (String) r[3])).getContent();
         }
 
-        @Query("SELECT u.id, u.name, u.email, u.imageUrl " +
+        @Query("SELECT u.id, u.name, u.email, u.imageUrl as image_url " +
                         "FROM User u " +
                         "WHERE u.id = :id")
         List<Object[]> fetchAuthorById(String id);
@@ -39,7 +39,7 @@ public interface UserRepository extends JpaRepository<User, String> {
                                 authorData.get(0)[0].toString(),
                                 authorData.get(0)[1].toString(),
                                 authorData.get(0)[2].toString(),
-                                (String)authorData.get(0)[3]);
+                                (String) authorData.get(0)[3]);
         }
 
         @Query("SELECT b.id, b.title, b.content " +

@@ -41,11 +41,12 @@ public class UserController {
         return userService.getMe();
     }
 
-    @PutMapping(value = "/user/profile", consumes = "multipart/form-data")
+    @PutMapping(value = "/user/profile",consumes = "multipart/form-data")
     public ResponseEntity<?> updateUser(@RequestParam(name = "file", required = true) MultipartFile file)
             throws RuntimeException {
-        
         return ResponseEntity.ok(new MessageResponse(userService.uploadImage(file), HttpStatus.OK.value()));
     }
+
+    
 
 }
