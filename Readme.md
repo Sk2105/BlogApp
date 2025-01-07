@@ -282,6 +282,12 @@ Respose Author
 | email | String | The email of the author |  
 | imageUrl | String | The URL of the author's profile image |
 
+Query Params
+| Field | Type | Description |
+| --- | --- | --- |
+| page | Integer | The page number |
+| size | Integer | The number of items per page |
+
 
 #### Response Status Codes: 400
 | Code | Description | Response Body |
@@ -376,6 +382,12 @@ Respose Author
 | email | String | The email of the author |
 | imageUrl | String | The URL of the author's profile image |
 
+Query Params
+| Field | Type | Description |
+| --- | --- | --- |
+| page | Integer | The page number |
+| size | Integer | The number of items per page |
+
 #### Response Status Codes: 400
 | Code | Description | Response Body |
 | --- | --- | --- |
@@ -444,6 +456,13 @@ Respose Author
 | email | String | The email of the author |
 | imageUrl | String | The URL of the author's profile image |
 
+
+Query Params
+| Field | Type | Description |
+| --- | --- | --- |
+| page | Integer | The page number |
+| size | Integer | The number of items per page |
+
 #### Response Status Codes: 400
 | Code | Description | Response Body |
 | --- | --- | --- |
@@ -458,18 +477,14 @@ Get an image by filename
 
 ```bash
 curl -X GET http://localhost:8080/api/images/u1.png
-    -H "Content-Type: application/json"
-    -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
+    -H "Content-Type: image/png"
 ```
 
 #### Response Status Codes: 200
 | Code | Description | Response Body |
 | --- | --- | --- |
 | 200 | OK | The image was successfully retrieved |
-| id | String | Unique identifier for the image |
-| filename | String | The filename of the image |
-| contentType | String | The content type of the image |
-| data | String | The base64 encoded data of the image |
+| image | Object | The image |
 
 #### Response Status Codes: 400
 | Code | Description | Response Body |
