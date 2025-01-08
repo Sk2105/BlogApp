@@ -1,8 +1,5 @@
 package com.sk.blogapp.services;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -36,6 +33,8 @@ public class UserService implements UserDetailsService {
     @Autowired
     private ImageService imageService;
 
+    @Value("${app.location}")
+    private String location;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -144,9 +143,8 @@ public class UserService implements UserDetailsService {
             image.setData(file.getBytes());
             imageService.saveFile(image);
 
-            InetAddress inetAddress = InetAddress.getLocalHost();
             User user = userRepository.findByEmail(getMe().email());
-            user.setImageUrl("http://" + inetAddress.getHostAddress() + ":8080" + "/images/" + image.getId());
+            user.setImageUrl(location + "images/" + image.getId());
             userRepository.save(user);
             return "Image uploaded successfully";
 
